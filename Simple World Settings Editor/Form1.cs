@@ -65,7 +65,7 @@ namespace Simple.World.Settings.Editor
 				{
 					if (fileVersion == 0)
 					{
-						MessageBox.Show("Error, world.data is full of zeros!");
+						MessageBox.Show("Error, world.dat is full of zeros!");
 						this._worldData.Clear();
 						return;
 					}
