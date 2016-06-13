@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using DamienG.Security.Cryptography;
 using Simple.World.Settings.Editor.Classes;
 using Simple.World.Settings.Editor.Dialogs;
 using Simple.World.Settings.Editor.Enums;
@@ -115,15 +116,29 @@ namespace Simple.World.Settings.Editor
 				this.listView1.Items.Add(lvi);
 			}
 
+			if ((Int32) this._worldData["mnVersion"] > 2)
+			{
+				MessageBox.Show(
+					"World Version is higher than this tool supports. There may be unsupported values, and can result in a corrupted world!");
+			}
+
 		}
 
 		private void WriteFile(string file)
 		{
+			var hash = new byte[0];
+			var crcFile = $"{file}.crc";
+
+			if (Path.GetExtension(file) == ".bak")
+				crcFile = Path.ChangeExtension(file, ".crc.bak");
+
 			using (var fs = File.OpenWrite(file))
 			using (var writer = new BinaryWriter(fs))
-			{
+			{ 
 				writer.Write(1); // File Format
-				writer.Write(1); // mnVersion
+				if ((Int32) this._worldData["mnVersion"] != -1)
+					writer.Write((Int32) this._worldData["mnVersion"]);
+				else writer.Write(2);
 				writer.Write((string) this._worldData["mName"]);
 				writer.Write((Int32) this._worldData["mnWorldSeed"]);
 				writer.Write((Single) this._worldData["mrGravity"]);
@@ -151,6 +166,22 @@ namespace Simple.World.Settings.Editor
 				writer.Write((Int64) this._worldData["mCPHCoordY"]);
 				writer.Write((Int64) this._worldData["mCPHCoordZ"]);
 			}
+
+			using (var fs = File.OpenRead(file))
+			{
+				var crc = new Crc32(3988292384u, 4294967295u);
+				hash = crc.ComputeHash(fs);
+			}
+
+			using (var fs = File.Open(crcFile, FileMode.OpenOrCreate))
+			using (var writer = new StreamWriter(fs))
+			{
+				for (var i = 0; i < hash.Length; i++)
+				{
+					writer.Write(hash[i].ToString("X2").ToLower());
+				}
+			}
+
 		}
 
 		private void listView1_DoubleClick(Object sender, EventArgs e)
