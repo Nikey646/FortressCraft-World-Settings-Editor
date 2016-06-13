@@ -35,7 +35,7 @@ namespace Simple.World.Settings.Editor
 				else ofd.InitialDirectory = Path.GetFullPath(Path.GetDirectoryName(lastPath));
 				if (ofd.ShowDialog() != DialogResult.OK)
 					return;
-				this._reg["lastPath"] = this.loadedFile =  ofd.FileName;
+				this._reg["lastPath"] = this.loadedFile = ofd.FileName;
 				this.ReadFile(this.loadedFile);
 			}
 		}
@@ -44,32 +44,29 @@ namespace Simple.World.Settings.Editor
 		{
 			// Save Dialog Maybe?
 			this.WriteFile(this.loadedFile);
+			MessageBox.Show($"Successfully saved \"{this.loadedFile}\". Enjoy your modified save!");
 		}
 
 		private void ReadFile(string file)
 		{
-			using (var fs =File.OpenRead(file))
+			using (var fs = File.OpenRead(file))
 			using (var reader = new BinaryReader(fs))
 			{
+				this._worldData.Clear();
 				this._worldData.Add("mPath", Path.GetDirectoryName(file), true);
 				this._worldData.Add("mnVersion", -1, true);
 
 				var fileVersion = reader.ReadInt32();
-				if (fileVersion < 0 || fileVersion > 1)
+				if (fileVersion < 0 || fileVersion > 1) // Not 0 or 1
 				{
 					MessageBox.Show($"Error, WorldData [{file}] has stupid version of {fileVersion}");
-					this._worldData.Clear();
 					return;
 				}
-				if (fileVersion != 1)
+				if (fileVersion != 1) // Not 1
 				{
-					if (fileVersion == 0)
-					{
-						MessageBox.Show("Error, world.dat is full of zeros!");
-						this._worldData.Clear();
-						return;
-					}
-					MessageBox.Show("Error, world.dat needs conversion!");
+					MessageBox.Show(fileVersion == 0 // It's a zero
+						? "Error, world.dat is full of zeros!"
+						: "Error, world.dat needs conversion!");
 					return;
 				}
 
@@ -102,6 +99,7 @@ namespace Simple.World.Settings.Editor
 				this._worldData.Add("mCPHCoordZ", reader.ReadInt64(), true);
 			}
 
+			this.listView1.Items.Clear();
 			foreach (var kv in this._worldData)
 			{
 				var lvi = new ListViewItem {Text = kv.Key};
@@ -204,6 +202,18 @@ namespace Simple.World.Settings.Editor
 					{
 						item.SubItems[1].Text = Convert.ToSingle(nd.Result).ToString("N7").TrimEnd('0', '.');
 						this._worldData[item.Text] = Convert.ToSingle(nd.Result);
+					}
+				}
+			}
+			if (type.BaseType == typeof (Enum))
+			{
+				var currentEnum = (Enum) this._worldData[item.Text];
+				using (var ed = new EnumDialog(currentEnum))
+				{
+					if (ed.ShowDialog() == DialogResult.OK)
+					{
+						item.SubItems[1].Text = ed.Result.ToString();
+						this._worldData[item.Text] = ed.Result;
 					}
 				}
 			}
