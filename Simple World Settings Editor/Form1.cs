@@ -109,7 +109,7 @@ namespace Simple.World.Settings.Editor
 				else if (kv.Value is Int32)
 					lvi.SubItems.Add(((Int32) kv.Value).ToString("N0"));
 				else if (kv.Value is Single)
-					lvi.SubItems.Add(((Single) kv.Value).ToString("N7").TrimEnd('0', '.'));
+					lvi.SubItems.Add(((Single) kv.Value).ToString("N7").TrimEnd('0').TrimEnd('.'));
 				else 
 					lvi.SubItems.Add(kv.Value.ToString());
 				lvi.Tag = kv.Value.GetType();
@@ -231,7 +231,7 @@ namespace Simple.World.Settings.Editor
 				{
 					if (nd.ShowDialog() == DialogResult.OK)
 					{
-						item.SubItems[1].Text = Convert.ToSingle(nd.Result).ToString("N7").TrimEnd('0', '.');
+						item.SubItems[1].Text = Convert.ToSingle(nd.Result).ToString("N7").TrimEnd('0').TrimEnd('.');
 						this._worldData[item.Text] = Convert.ToSingle(nd.Result);
 					}
 				}
