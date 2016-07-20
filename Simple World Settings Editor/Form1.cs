@@ -98,6 +98,8 @@ namespace Simple.World.Settings.Editor
 				this._worldData.Add("mCPHCoordX", reader.ReadInt64(), true);
 				this._worldData.Add("mCPHCoordY", reader.ReadInt64(), true);
 				this._worldData.Add("mCPHCoordZ", reader.ReadInt64(), true);
+				this._worldData.Add("mbFlatland", reader.ReadBoolean(), true);
+				this._worldData.Add("mbCarePackage", reader.ReadBoolean(), true);
 			}
 
 			this.listView1.Items.Clear();
@@ -116,7 +118,7 @@ namespace Simple.World.Settings.Editor
 				this.listView1.Items.Add(lvi);
 			}
 
-			if ((Int32) this._worldData["mnVersion"] > 2)
+			if ((Int32) this._worldData["mnVersion"] > 4)
 			{
 				MessageBox.Show(
 					"World Version is higher than this tool supports. There may be unsupported values, and can result in a corrupted world!");
@@ -138,7 +140,7 @@ namespace Simple.World.Settings.Editor
 				writer.Write(1); // File Format
 				if ((Int32) this._worldData["mnVersion"] != -1)
 					writer.Write((Int32) this._worldData["mnVersion"]);
-				else writer.Write(2);
+				else writer.Write(4);
 				writer.Write((string) this._worldData["mName"]);
 				writer.Write((Int32) this._worldData["mnWorldSeed"]);
 				writer.Write((Single) this._worldData["mrGravity"]);
@@ -165,6 +167,8 @@ namespace Simple.World.Settings.Editor
 				writer.Write((Int64) this._worldData["mCPHCoordX"]);
 				writer.Write((Int64) this._worldData["mCPHCoordY"]);
 				writer.Write((Int64) this._worldData["mCPHCoordZ"]);
+				writer.Write((Boolean) this._worldData["mbFlatland"]);
+				writer.Write((Boolean) this._worldData["mbCarePackage"]);
 			}
 
 			using (var fs = File.OpenRead(file))
